@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import * as TOML from "smol-toml";
 import type { Config } from "./rsjudge-schema";
 
