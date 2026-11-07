@@ -1,54 +1,99 @@
-use std::{num::NonZeroU32, path::PathBuf};
+use std::num::NonZeroU32;
+use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+/// The root of a `problem.toml` file.
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CasesConfig {
-    score: NonZeroU32,
-    judge: JudgeType,
-    resource_limits: ResourceLimits,
-    task: TaskType,
+    /// The total score of the problem.
+    pub score: NonZeroU32,
+
+    /// How the submission's output is judged.
+    pub judge: JudgeType,
+
+    /// The resource limits every case runs under.
+    pub resource_limits: ResourceLimits,
+
+    /// The cases and how they are scored.
+    pub task: TaskType,
 }
 
+/// How the output of a submission is judged.
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 #[serde(tag = "judgeType")]
 pub enum JudgeType {
+    /// Compare the output with the answer file.
     Classic,
-    SpecialJudge { checker: PathBuf },
-    Interactive { interactor: PathBuf },
+
+    /// Run a trusted checker on the input, the answer and the output.
+    SpecialJudge {
+        /// The checker program, relative to the problem root.
+        checker: PathBuf,
+    },
+
+    /// Run a trusted interactor that talks to the submission.
+    Interactive {
+        /// The interactor program, relative to the problem root.
+        interactor: PathBuf,
+    },
 }
 
+/// The resource limits of a problem.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ResourceLimits {
-    time: u32,
-    memory: u32,
+    /// The CPU time limit, in milliseconds. Zero means unlimited.
+    pub time: u32,
+
+    /// The address-space limit, in megabytes. Zero means unlimited.
+    pub memory: u32,
 }
 
+/// The task layout of a problem.
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 #[serde(tag = "taskType")]
 pub enum TaskType {
-    Simple { cases: Vec<Case> },
-    Subtask { subtasks: Vec<Subtask> },
+    /// Every case is scored on its own.
+    Simple {
+        /// The cases of the problem.
+        cases: Vec<Case>,
+    },
+
+    /// Every subtask is scored as a whole.
+    Subtask {
+        /// The subtasks of the problem.
+        subtasks: Vec<Subtask>,
+    },
 }
 
+/// One case of a problem.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Case {
-    input: PathBuf,
-    answer: PathBuf,
+    /// The input file, relative to the problem root.
+    pub input: PathBuf,
 
+    /// The answer file, relative to the problem root.
+    pub answer: PathBuf,
+
+    /// The score of this case. Simple tasks may omit it, and then the
+    /// problem's total score is divided evenly among the cases.
     #[serde(skip_serializing_if = "Option::is_none")]
-    score: Option<NonZeroU32>,
+    pub score: Option<NonZeroU32>,
 }
 
+/// One subtask of a problem.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Subtask {
-    cases: Vec<Case>,
+    /// The cases of the subtask.
+    pub cases: Vec<Case>,
 
+    /// The score of this subtask. Subtasks may omit it, and then the
+    /// problem's total score is divided evenly among the subtasks.
     #[serde(skip_serializing_if = "Option::is_none")]
-    score: Option<NonZeroU32>,
+    pub score: Option<NonZeroU32>,
 }
 
 #[cfg(test)]
