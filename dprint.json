@@ -5,8 +5,8 @@
   },
   "excludes": [],
   "plugins": [
-    "https://plugins.dprint.dev/json-0.19.3.wasm",
-    "https://plugins.dprint.dev/typescript-0.91.6.wasm",
-    "https://plugins.dprint.dev/toml-0.6.2.wasm"
+    "npm:@dprint/json@0.26.0",
+    "npm:@dprint/typescript@0.101.0",
+    "npm:@dprint/toml@0.10.0"
   ]
 }
