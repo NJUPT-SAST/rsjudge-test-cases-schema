@@ -3,7 +3,23 @@
 import * as TOML from "smol-toml";
 import type { Config } from "./rsjudge-schema";
 
-const simpleConfig: Config = {
+/**
+ * Write one configuration as both a JSON and a TOML example.
+ *
+ * Both files end with a newline: `cat out/classic-simple.json` and a diff
+ * against a regenerated copy then behave the way a text file is expected to.
+ * The files carry no SPDX header of their own — they are generated, and the
+ * generator is the thing that is licensed and reviewed.
+ */
+async function emit(name: string, config: Config) {
+  const json = `${JSON.stringify(config, undefined, 2)}\n`;
+  const toml = TOML.stringify(config);
+
+  await Bun.write(`out/${name}.json`, json);
+  await Bun.write(`out/${name}.toml`, toml.endsWith("\n") ? toml : `${toml}\n`);
+}
+
+const classicSimple: Config = {
   score: 100,
   judge: {
     judgeType: "classic",
@@ -21,16 +37,7 @@ const simpleConfig: Config = {
   },
 };
 
-await Bun.write(
-  "out/classic-simple.json",
-  JSON.stringify(simpleConfig, undefined, 2),
-);
-await Bun.write(
-  "out/classic-simple.toml",
-  TOML.stringify(simpleConfig),
-);
-
-const subtaskConfig: Config = {
+const classicSubtasks: Config = {
   score: 100,
   judge: {
     judgeType: "classic",
@@ -60,16 +67,7 @@ const subtaskConfig: Config = {
   },
 };
 
-await Bun.write(
-  "out/classic-subtasks.json",
-  JSON.stringify(subtaskConfig, undefined, 2),
-);
-await Bun.write(
-  "out/classic-subtasks.toml",
-  TOML.stringify(subtaskConfig),
-);
-
-const interactiveConfig: Config = {
+const interactiveSimple: Config = {
   score: 100,
   judge: {
     judgeType: "interactive",
@@ -88,16 +86,7 @@ const interactiveConfig: Config = {
   },
 };
 
-await Bun.write(
-  "out/interactive-simple.json",
-  JSON.stringify(interactiveConfig, undefined, 2),
-);
-await Bun.write(
-  "out/interactive-simple.toml",
-  TOML.stringify(interactiveConfig),
-);
-
-const specialJudgeConfig: Config = {
+const specialJudgeSubtasks: Config = {
   score: 100,
   judge: {
     judgeType: "special-judge",
@@ -128,11 +117,7 @@ const specialJudgeConfig: Config = {
   },
 };
 
-await Bun.write(
-  "out/special-judge-subtasks.json",
-  JSON.stringify(specialJudgeConfig, undefined, 2),
-);
-await Bun.write(
-  "out/special-judge-subtasks.toml",
-  TOML.stringify(specialJudgeConfig),
-);
+await emit("classic-simple", classicSimple);
+await emit("classic-subtasks", classicSubtasks);
+await emit("interactive-simple", interactiveSimple);
+await emit("special-judge-subtasks", specialJudgeSubtasks);

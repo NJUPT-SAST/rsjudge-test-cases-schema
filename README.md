@@ -71,18 +71,44 @@ score = 60
   names a score, the problem's total score is divided evenly among the
   subtasks. A subtask earns its score only when every case passes.
 
-## Rust implementation
+## Reference examples
 
-`rust-serde-impl/` is the serde implementation of this schema and is consumed
-by rsjudge directly. The TypeScript definitions in `rsjudge-schema.d.ts`
-describe the same fields, and the files in `out/` are generated examples.
+`out/` holds one configuration per judge type and task type combination:
+
+| File | `judgeType` | `taskType` |
+|------|-------------|------------|
+| `classic-simple` | `classic` | `simple` |
+| `classic-subtasks` | `classic` | `subtask` |
+| `special-judge-subtasks` | `special-judge` | `subtask` |
+| `interactive-simple` | `interactive` | `simple` |
+
+Each one exists as both `.json` and `.toml`. They are the cross-language
+contract: the Rust implementation in
+[`rsjudge-test-cases-schema`](https://github.com/NJUPT-SAST/rsjudge/tree/main/crates/rsjudge-test-cases-schema)
+parses them in its test suite, so a change to either implementation that the
+other cannot read fails that repository's CI.
+
+The files are generated and carry no license header of their own. Every one
+ends with a newline, so `cat out/classic-simple.json` and a diff against a
+freshly generated copy behave the way a text file is expected to.
+
+## Implementations
+
+- **TypeScript**: `rsjudge-schema.d.ts` declares the types, and `index.ts`
+  generates the reference examples in `out/`.
+- **Rust**: the serde implementation lives in the main repository, as
+  [`crates/rsjudge-test-cases-schema`](https://github.com/NJUPT-SAST/rsjudge/tree/main/crates/rsjudge-test-cases-schema).
+  It is not published as a crate; only rsjudge consumes it.
 
 ## Development
 
 The TypeScript side was created with [Bun](https://bun.sh/). Install it, then
-run:
+regenerate the reference examples:
 
 ```bash
 bun install
 bun run index.ts
 ```
+
+Regeneration is deterministic: running it twice produces byte-identical files,
+and re-running it on a clean checkout leaves `out/` unchanged.
